@@ -39,7 +39,7 @@ const authenticate = (req, res, next) => {
   if (!token) return res.status(401).json({ message: "Access Denied" });
 
   try {
-    const verified = jwt.verify(token, "FinalExamSecret2026");
+    const verified = jwt.verify(token, "JWT_ACCESS_SECRET");
     req.user = verified;
     next();
   } catch (err) {
@@ -69,10 +69,10 @@ app.post("/signUp", async (req, res) => {
     const newUser = new User({ name, email, password });
     await newUser.save();
 
-    const token = jwt.sign({ id: newUser._id }, "FinalExamSecret2026", {
+    const token = jwt.sign({ id: newUser._id }, "JWT_ACCESS_SECRET", {
       expiresIn: "2h",
     });
-    const refreshToken = jwt.sign({ id: newUser._id }, "RefreshSecretKey789", {
+    const refreshToken = jwt.sign({ id: newUser._id }, "JWT_REFRESH_SECRET", {
       expiresIn: "1d",
     });
 
@@ -95,10 +95,10 @@ app.post("/login", async (req, res) => {
     return res.status(404).json({ message: "wrong email or password" });
   }
 
-  const token = jwt.sign({ id: user._id }, "FinalExamSecret2026", {
+  const token = jwt.sign({ id: user._id }, "JWT_ACCESS_SECRET", {
     expiresIn: "2h",
   });
-  const refreshToken = jwt.sign({ id: user._id }, "RefreshSecretKey789", {
+  const refreshToken = jwt.sign({ id: user._id }, "JWT_REFRESH_SECRET", {
     expiresIn: "1d",
   });
 
@@ -117,8 +117,8 @@ app.post("/getNewJwtToken", (req, res) => {
     return res.status(400).json({ message: "No refresh token provided" });
 
   try {
-    const decoded = jwt.verify(jwt_refresh_token, "RefreshSecretKey789");
-    const newToken = jwt.sign({ id: decoded.id }, "FinalExamSecret2026", {
+    const decoded = jwt.verify(jwt_refresh_token, "JWT_REFRESH_SECRET");
+    const newToken = jwt.sign({ id: decoded.id }, "JWT_ACCESS_SECRET", {
       expiresIn: "2h",
     });
     res.status(200).json({ jwt_token: newToken, jwt_refresh_token });
